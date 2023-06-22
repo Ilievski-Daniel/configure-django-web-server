@@ -1,0 +1,129 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install python3-venv package
+      apt:
+        name: python3-venv
+        state: present
+
+    - name: Create a virtual environment
+      command: python3 -m venv env
+      args:
+        chdir: /home/ubuntu
+    
+    - name: Activate the virtual environment as root
+      shell: |
+        source /home/ubuntu/env/bin/activate
+      args:
+        chdir: /home/ubuntu
+        executable: /bin/bash
+      become_user: root
+
+    - name: Install python3-pip package
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Clone django-demo repository
+      git:
+        repo: https://github.com/genialis/django-demo
+        dest: /home/ubuntu/django-demo
+        force: yes
+
+    - name: Install requirements from django-demo
+      pip:
+        requirements: /home/ubuntu/django-demo/requirements.txt
+        virtualenv: /home/ubuntu/env
+    
+    - name: Install Gunicorn
+      pip:
+        name: gunicorn
+        virtualenv: /home/ubuntu/env
+
+    - name: Set server public IP variable
+      set_fact:
+        server_public_ip: "{{ server_public_ip }}"
+
+    - name: Overwrite settings.py file
+      template:
+        src: settings.py.j2
+        dest: /home/ubuntu/django-demo/demo/settings.py
+      vars:
+        server_public_ip: "{{ server_public_ip }}"
+
+    - name: Install Supervisor
+      apt:
+        name: supervisor
+        state: present
+    
+    - name: Create gunicorn.conf file
+      template:
+        src: gunicorn.conf.j2
+        dest: /etc/supervisor/conf.d/gunicorn.conf
+      vars:
+        directory_path: "/home/ubuntu"
+        log_directory: "/var/log/gunicorn"
+        project_name: "django-demo"
+        app_name: "demo"
+          
+    - name: Create /var/log/gunicorn directory
+      file:
+        path: /var/log/gunicorn
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Run supervisorctl reread
+      shell: |
+        source /home/ubuntu/env/bin/activate
+        supervisorctl reread 
+    
+    - name: Run supervisorctl update
+      shell: |
+        source /home/ubuntu/env/bin/activate
+        supervisorctl update 
+
+    - name: Restart supervisor
+      shell: |
+        source /home/ubuntu/env/bin/activate
+        /usr/bin/systemctl restart supervisor
+
+    - name: Overwrite default Nginx configuration
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+
+    - name: Reload Nginx service
+      service:
+        name: nginx
+        state: reloaded
+
+    - name: Run migrate command
+      shell: |
+        source /home/ubuntu/env/bin/activate
+        python3 manage.py migrate
+      args:
+        chdir: /home/ubuntu/django-demo
+        executable: /bin/bash
+
+    - name: Run collectstatic command
+      shell: |
+        source /home/ubuntu/env/bin/activate
+        python3 manage.py collectstatic --noinput
+      args:
+        chdir: /home/ubuntu/django-demo
+        executable: /bin/bash
+    
+    - name: Restart Nginx service
+      service:
+        name: nginx
+        state: restarted

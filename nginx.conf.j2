@@ -1,0 +1,21 @@
+server {
+    listen 80;
+    server_name {{ server_public_ip }};
+
+    location / {
+        return 301 /admin;
+    }
+
+    location /admin {
+        include proxy_params;
+        proxy_pass http://unix:/home/ubuntu/django-demo/app.sock;
+    }
+
+    location /static/ {
+        alias /home/ubuntu/django-demo/static/;
+    }
+
+    location /media/ {
+        alias /home/ubuntu/django-demo/media/;
+    }
+}
