@@ -64,7 +64,6 @@ Each task is defined with a name and utilizes different Ansible modules to carry
     - Running Ansible Lint to check the formatting of the configure_django_web_server.yml playbook.
 
 <br>
-<br>
 
 -   By including this workflow in your repository, it ensures that any changes made to the playbook are automatically validated for proper formatting.
 
