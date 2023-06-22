@@ -54,6 +54,7 @@ Each task is defined with a name and utilizes different Ansible modules to carry
 
 - The provided GitHub Actions workflow is used to automate the process of checking the formatting of the Ansible playbook using Ansible Lint. The workflow is triggered on push and pull request events for all branches.
 <br>
+
 -   Here's an overview of the workflow:
     - The workflow runs on an Ubuntu environment (runs-on: ubuntu-latest).
     - It includes several steps:
@@ -61,8 +62,10 @@ Each task is defined with a name and utilizes different Ansible modules to carry
     - Setting up Python version 3.x using the actions/setup-python action.
     - Installing Ansible Lint by running the pip install ansible-lint command.
     - Running Ansible Lint to check the formatting of the configure_django_web_server.yml playbook.
+
 <br>
 <br>
+
 -   By including this workflow in your repository, it ensures that any changes made to the playbook are automatically validated for proper formatting.
 
 ## Contact
