@@ -1,81 +1,95 @@
 ---
 
-- hosts: all
+- name: Configure Django Web Server
+  hosts: all
   become: true
   tasks:
 
     - name: Update apt cache
-      apt:
-        update_cache: yes
+      ansible.builtin.apt:
+        update_cache: true
         cache_valid_time: 3600
 
     - name: Install python3-venv package
-      apt:
+      ansible.builtin.apt:
         name: python3-venv
         state: present
 
     - name: Create a virtual environment
-      command: python3 -m venv env
+      ansible.builtin.command: python3 -m venv env
       args:
         chdir: /home/ubuntu
-    
+      changed_when: false
+
     - name: Activate the virtual environment as root
-      shell: |
+      ansible.builtin.shell: |
         source /home/ubuntu/env/bin/activate
       args:
         chdir: /home/ubuntu
         executable: /bin/bash
+      changed_when: false
       become_user: root
 
     - name: Install python3-pip package
-      apt:
+      ansible.builtin.apt:
         name: python3-pip
         state: present
+      changed_when: false
 
     - name: Clone django-demo repository
-      git:
+      ansible.builtin.git:
         repo: https://github.com/genialis/django-demo
         dest: /home/ubuntu/django-demo
-        force: yes
+        update: true
+        version: main
+        force: true
 
     - name: Install requirements from django-demo
-      pip:
+      ansible.builtin.pip:
         requirements: /home/ubuntu/django-demo/requirements.txt
         virtualenv: /home/ubuntu/env
-    
+
     - name: Install Gunicorn
-      pip:
+      ansible.builtin.pip:
         name: gunicorn
         virtualenv: /home/ubuntu/env
 
-    - name: Set server public IP variable
-      set_fact:
+    - name: Set variables for template task
+      ansible.builtin.set_fact:
         server_public_ip: "{{ server_public_ip }}"
 
     - name: Overwrite settings.py file
-      template:
+      ansible.builtin.template:
         src: settings.py.j2
         dest: /home/ubuntu/django-demo/demo/settings.py
-      vars:
-        server_public_ip: "{{ server_public_ip }}"
+        owner: root
+        group: root
+        mode: "0644"
+        force: true
 
     - name: Install Supervisor
-      apt:
+      ansible.builtin.apt:
         name: supervisor
         state: present
-    
-    - name: Create gunicorn.conf file
-      template:
-        src: gunicorn.conf.j2
-        dest: /etc/supervisor/conf.d/gunicorn.conf
-      vars:
+
+    - name: Set variables for gunicorn.conf template
+      ansible.builtin.set_fact:
         directory_path: "/home/ubuntu"
         log_directory: "/var/log/gunicorn"
         project_name: "django-demo"
         app_name: "demo"
-          
+
+    - name: Create gunicorn.conf file
+      ansible.builtin.template:
+        src: gunicorn.conf.j2
+        dest: /etc/supervisor/conf.d/gunicorn.conf
+        owner: root
+        group: root
+        mode: "0644"
+        force: true
+
     - name: Create /var/log/gunicorn directory
-      file:
+      ansible.builtin.file:
         path: /var/log/gunicorn
         state: directory
         mode: '0755'
@@ -83,47 +97,56 @@
         group: root
 
     - name: Run supervisorctl reread
-      shell: |
+      ansible.builtin.shell: |
         source /home/ubuntu/env/bin/activate
-        supervisorctl reread 
-    
+        supervisorctl reread
+      changed_when: false
+
     - name: Run supervisorctl update
-      shell: |
+      ansible.builtin.shell: |
         source /home/ubuntu/env/bin/activate
-        supervisorctl update 
+        supervisorctl update
+      changed_when: false
 
     - name: Restart supervisor
-      shell: |
+      ansible.builtin.shell: |
         source /home/ubuntu/env/bin/activate
         /usr/bin/systemctl restart supervisor
+      changed_when: false
 
     - name: Overwrite default Nginx configuration
-      template:
+      ansible.builtin.template:
         src: nginx.conf.j2
         dest: /etc/nginx/sites-available/default
+        owner: ubuntu
+        group: ubuntu
+        mode: "0644"
+        force: true
 
     - name: Reload Nginx service
-      service:
+      ansible.builtin.service:
         name: nginx
         state: reloaded
 
     - name: Run migrate command
-      shell: |
+      ansible.builtin.shell: |
         source /home/ubuntu/env/bin/activate
         python3 manage.py migrate
       args:
         chdir: /home/ubuntu/django-demo
         executable: /bin/bash
+      changed_when: false
 
     - name: Run collectstatic command
-      shell: |
+      ansible.builtin.shell: |
         source /home/ubuntu/env/bin/activate
         python3 manage.py collectstatic --noinput
       args:
         chdir: /home/ubuntu/django-demo
         executable: /bin/bash
-    
+      changed_when: false
+
     - name: Restart Nginx service
-      service:
+      ansible.builtin.service:
         name: nginx
         state: restarted
