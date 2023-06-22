@@ -1,1 +1,25 @@
+# Ansible gitignore files/directories
 *.retry
+
+# Jinja gitignore files/directories
+*.so
+docs/_build/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+build/
+dist/
+.DS_Store
+.tox/
+.cache/
+.idea/
+env/
+venv/
+venv-*/
+.coverage
+.coverage.*
+htmlcov
+.pytest_cache/
+/.vscode/
+.mypy_cache
