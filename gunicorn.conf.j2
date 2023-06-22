@@ -1,0 +1,10 @@
+[program:gunicorn]
+directory={{ directory_path }}/{{ project_name }}
+command={{ directory_path }}/env/bin/gunicorn --workers 3 --bind unix:{{ directory_path }}/{{ project_name }}/app.sock {{ app_name }}.wsgi:application  
+autostart=true
+autorestart=true
+stderr_logfile={{ log_directory }}/gunicorn.err.log
+stdout_logfile={{ log_directory }}/gunicorn.out.log
+
+[group:guni]
+programs:gunicorn
