@@ -45,45 +45,25 @@ Before running this playbook, make sure you have:
 The playbook performs the following tasks:
 
 1. Updates the apt cache on the target server(s).
-
 2. Installs the python3-venv package.
-
 3. Creates a virtual environment for the Django application.
-
 4. Activates the virtual environment.
-
 5. Installs the python3-pip package.
-
 6. Clones the Django application repository from the specified URL.
-
 7. Installs the project dependencies from the requirements.txt file.
-
 8. Installs Gunicorn as the application server.
-
 9. Sets the server_public_ip variable.
-
 10. Overwrites the settings.py file with the provided Jinja template.
-
 11. Installs the Supervisor package.
-
 12. Creates the gunicorn.conf file using the provided Jinja template.
-
 13. Creates the /var/log/gunicorn directory.
-
 14. Runs supervisorctl reread to update Supervisor configuration.
-
 15. Runs supervisorctl update to apply the changes.
-
 16. Restarts the Supervisor service.
-
 17. Overwrites the default Nginx configuration using the provided Jinja template.
-
 18. Reloads the Nginx service to apply the changes.
-
 19. Runs the Django migration command.
-
 20. Collects static files for the Django application.
-
 21. Restarts the Nginx service.
 
 ## Contact
