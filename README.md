@@ -40,31 +40,30 @@ Before running this playbook, make sure you have:
 
     You should be able to see the Django administration page, that is the configuration that I have put so that nginx redirects users from ```/``` to ```/admin```.
 
-## Playbook Tasks
+## Playbook
 
-The playbook performs the following tasks:
+The playbook is written in YAML and is used by Ansible to define a set of tasks to be executed on the target hosts. In this case, the playbook is named "Configure Django Web Server" and has the following structure:
 
-1. Updates the apt cache on the target server(s).
-2. Installs the python3-venv package.
-3. Creates a virtual environment for the Django application.
-4. Activates the virtual environment.
-5. Installs the python3-pip package.
-6. Clones the Django application repository from the specified URL.
-7. Installs the project dependencies from the requirements.txt file.
-8. Installs Gunicorn as the application server.
-9. Sets the server_public_ip variable.
-10. Overwrites the settings.py file with the provided Jinja template.
-11. Installs the Supervisor package.
-12. Creates the gunicorn.conf file using the provided Jinja template.
-13. Creates the /var/log/gunicorn directory.
-14. Runs supervisorctl reread to update Supervisor configuration.
-15. Runs supervisorctl update to apply the changes.
-16. Restarts the Supervisor service.
-17. Overwrites the default Nginx configuration using the provided Jinja template.
-18. Reloads the Nginx service to apply the changes.
-19. Runs the Django migration command.
-20. Collects static files for the Django application.
-21. Restarts the Nginx service.
+The playbook targets all hosts (hosts: all) and requires elevated privileges (become: true).
+
+The playbook consists of multiple tasks that perform various configuration steps for setting up a Django web server.
+
+Each task is defined with a name and utilizes different Ansible modules to carry out specific actions. Some of the tasks include updating the apt cache, installing packages, creating a virtual environment, cloning a Git repository, installing Python dependencies, configuring Supervisor and Nginx, and running Django management commands.
+
+## GitHub Actions Workflow
+
+- The provided GitHub Actions workflow is used to automate the process of checking the formatting of the Ansible playbook using Ansible Lint. The workflow is triggered on push and pull request events for all branches.
+<br>
+-   Here's an overview of the workflow:
+    - The workflow runs on an Ubuntu environment (runs-on: ubuntu-latest).
+    - It includes several steps:
+    - Checking out the repository using the actions/checkout action.
+    - Setting up Python version 3.x using the actions/setup-python action.
+    - Installing Ansible Lint by running the pip install ansible-lint command.
+    - Running Ansible Lint to check the formatting of the configure_django_web_server.yml playbook.
+<br>
+<br>
+-   By including this workflow in your repository, it ensures that any changes made to the playbook are automatically validated for proper formatting.
 
 ## Contact
 For any questions or inquiries, please contact: [Daniel Ilievski](https://www.linkedin.com/in/danielilievski/)
