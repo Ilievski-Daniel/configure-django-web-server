@@ -9,6 +9,16 @@ Before running this playbook, make sure you have:
 2. SSH access to the target server(s) with sudo privileges.
 3. The necessary server IP address or hostname.
 
+## Playbook
+
+The playbook is written in YAML and is used by Ansible to define a set of tasks to be executed on the target hosts. In this case, the playbook is named "Configure Django Web Server" and has the following structure:
+
+The playbook targets all hosts (hosts: all) and requires elevated privileges (become: true).
+
+The playbook consists of multiple tasks that perform various configuration steps for setting up a Django web server.
+
+Each task is defined with a name and utilizes different Ansible modules to carry out specific actions. Some of the tasks include updating the apt cache, installing packages, creating a virtual environment, cloning a Git repository, installing Python dependencies, configuring Supervisor and Nginx, and running Django management commands.
+
 ## Usage
 1. Clone this repository to your local machine:
     
@@ -39,16 +49,6 @@ Before running this playbook, make sure you have:
 6. Once the playbook execution is complete, you can access your Django application by navigating to ```http://<server_public_ip>``` in your web browser.
 
     You should be able to see the Django administration page, that is the configuration that I have put so that nginx redirects users from ```/``` to ```/admin```.
-
-## Playbook
-
-The playbook is written in YAML and is used by Ansible to define a set of tasks to be executed on the target hosts. In this case, the playbook is named "Configure Django Web Server" and has the following structure:
-
-The playbook targets all hosts (hosts: all) and requires elevated privileges (become: true).
-
-The playbook consists of multiple tasks that perform various configuration steps for setting up a Django web server.
-
-Each task is defined with a name and utilizes different Ansible modules to carry out specific actions. Some of the tasks include updating the apt cache, installing packages, creating a virtual environment, cloning a Git repository, installing Python dependencies, configuring Supervisor and Nginx, and running Django management commands.
 
 ## GitHub Actions Workflow
 
